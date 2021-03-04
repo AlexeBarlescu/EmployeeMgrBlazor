@@ -22,16 +22,28 @@
                         </li>
                     }
                 </ul>
+                <div class="mt-2 mt-md-0">
+                    <button class="btn btn-sm btn-info mr-1"
+                            @onclick="@(() => Theme = "info")">
+                        Info
+                    </button>
+                    <button class="btn btn-sm btn-warning mr-1"
+                            @onclick="@(() => Theme = "warning")">
+                        Warning
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 </header>
 
-<div class="container">
-    <main role="main" class="pb-3">
-        @Body
-    </main>
-</div>
+<CascadingValue Name="Theme" Value="Theme" IsFixed="false">
+    <div class="container">
+        <main role="main" class="pb-3">
+            @Body
+        </main>
+    </div>
+</CascadingValue>
 
 <footer class="border-top footer text-muted">
     <div class="container">
@@ -46,4 +58,6 @@
         { "Employees", "/employees" },
         { "Departments", "/departments" }
     };
+
+    public string Theme { get; set; } = "info";
 }

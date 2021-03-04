@@ -1,0 +1,10 @@
+﻿<h2 class="text-@Theme">@Title.ToUpper()</h2>
+
+@code 
+{
+    [CascadingParameter(Name = "Theme")]
+    public string Theme { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+}
