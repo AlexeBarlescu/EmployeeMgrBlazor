@@ -1,0 +1,49 @@
+﻿@inherits LayoutComponentBase
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-dark navbar-dark mb-3">
+        <div class="container">
+            <NavLink class="navbar-brand" href="/">EM</NavLink>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse">
+                <ul class="navbar-nav mr-auto">
+                    @foreach (var key in NavLinks.Keys)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link"
+                                     href="@NavLinks[key]"
+                                     ActiveClass="active"
+                                     Match="NavLinkMatch.Prefix">
+                                @key
+                            </NavLink>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container">
+    <main role="main" class="pb-3">
+        @Body
+    </main>
+</div>
+
+<footer class="border-top footer text-muted">
+    <div class="container">
+        &copy; 2021 - Alexe Barlescu
+    </div>
+</footer>
+
+@code
+{
+    public Dictionary<string, string> NavLinks => new Dictionary<string, string>
+    {
+        { "Employees", "/employees" },
+        { "Departments", "/departments" }
+    };
+}
