@@ -1,4 +1,34 @@
 ﻿@page "/"
 @page "/employees"
+@inherits OwningComponentBase<DataContext>
 
 <PageTitle Title="Employees"/>
+
+<TableTemplate RowType="Employee" RowData="EmployeeData">
+    <Head>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Location</th>
+    </Head>
+    <RowTemplate Context="e">
+        <td>@e.Id</td>
+        <td>@e.Name</td>
+        <td>@e.Department.Name</td>
+        <td>@e.Location.City, @e.Location.State</td>
+    </RowTemplate>
+</TableTemplate>
+
+@code 
+{
+    DataContext Context => Service;
+
+    public IEnumerable<Employee> EmployeeData { get; set; } = Enumerable.Empty<Employee>();
+    public IQueryable<Employee> Query => Context.Employees
+        .Include(e => e.Department).Include(e => e.Location);
+
+    protected override void OnInitialized()
+    {
+        EmployeeData = Query.ToList();
+    }
+} 

@@ -1,0 +1,24 @@
+﻿@typeparam RowType
+
+<table class="table table-striped table-bordered table-sm">
+    <thead><tr>@Head</tr></thead>
+    <tbody>
+        @foreach (RowType e in RowData)
+        {
+            <tr>
+                @RowTemplate(e)
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public RenderFragment Head { get; set; }
+    [Parameter]
+    public IEnumerable<RowType> RowData { get; set; }
+
+    [Parameter]
+    public RenderFragment<RowType> RowTemplate { get; set; }
+
+}

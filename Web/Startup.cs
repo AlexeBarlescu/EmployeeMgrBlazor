@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Web.DataAccess;
 
 namespace Web
 {
@@ -24,10 +27,14 @@ namespace Web
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+
+            SqliteConnection conn = new SqliteConnection("DataSource=:memory:");
+            conn.Open();
+            services.AddDbContext<DataContext>(opts => opts.UseSqlite(conn));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext ctx)
         {
             if (env.IsDevelopment())
             {
@@ -50,6 +57,8 @@ namespace Web
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            SeedData.Seed(ctx);
         }
     }
 }
