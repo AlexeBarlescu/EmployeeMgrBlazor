@@ -9,6 +9,30 @@
                 @RowTemplate(e)
             </tr>
         }
+        <tr>
+            <td colspan="6">
+                <ul class="pagination pagination-sm my-1">
+                    <li class="page-item @(PageNumber <= 1 ? "disabled": "")">
+                        <NavLink href="@($"/{PageName}?page={PageNumber - 1}")" class="page-link">
+                            Previous
+                        </NavLink>
+                    </li>
+                    @for (int i = 1; i <= TotalPages; i++)
+                    {
+                        int index = i;
+                        <li class="page-item">
+                            <NavLink href="@($"/{PageName}?page={index}")" class="page-link">@index</NavLink>
+                        </li>
+                    }
+                    <li class="page-item @(PageNumber >= TotalPages ? "disabled": "")">
+                        <NavLink href="@($"/{PageName}?page={PageNumber + 1}")"
+                                 class="page-link">
+                            Next
+                        </NavLink>
+                    </li>
+                </ul>
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -20,5 +44,12 @@
 
     [Parameter]
     public RenderFragment<RowType> RowTemplate { get; set; }
+
+    [Parameter]
+    public int PageNumber { get; set; }
+    [Parameter]
+    public int TotalPages { get; set; }
+    [Parameter]
+    public string PageName { get; set; }
 
 }

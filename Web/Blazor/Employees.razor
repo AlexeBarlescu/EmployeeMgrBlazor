@@ -1,10 +1,13 @@
 ﻿@page "/"
 @page "/employees"
 @inherits OwningComponentBase<DataContext>
+@inject NavigationManager NavManager
 
 <PageTitle Title="Employees"/>
 
-<TableTemplate RowType="Employee" RowData="EmployeeData">
+<TableTemplate RowType="Employee" RowData="EmployeeData" 
+               PageNumber="pageNumber" TotalPages="totalPages"
+               PageName="employees">
     <Head>
         <th>Id</th>
         <th>Name</th>
@@ -23,12 +26,40 @@
 {
     DataContext Context => Service;
 
+    int pageNumber = 1;
+    int pageSize = 6;
+    int totalPages = 0;
+
     public IEnumerable<Employee> EmployeeData { get; set; } = Enumerable.Empty<Employee>();
     public IQueryable<Employee> Query => Context.Employees
         .Include(e => e.Department).Include(e => e.Location);
 
     protected override void OnInitialized()
     {
-        EmployeeData = Query.ToList();
+        GetPageNumberFromQuery();
+        totalPages = (int)Math.Ceiling((double)Context.Employees.Count() / pageSize);
+
+        UpdateData();
+
+        NavManager.LocationChanged += HandleLocationChanged;
+    }
+
+    void UpdateData() =>
+        EmployeeData = Query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+    void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        GetPageNumberFromQuery();
+        UpdateData();
+        StateHasChanged();
+    }
+
+    void GetPageNumberFromQuery()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        if(QueryHelpers.ParseQuery(uri.Query).TryGetValue("page", out var page))
+        {
+            pageNumber = Convert.ToInt32(page);
+        }
     }
 } 
