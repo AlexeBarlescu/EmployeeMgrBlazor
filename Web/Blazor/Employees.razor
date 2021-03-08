@@ -22,8 +22,11 @@
         <td>@e.Department.Name</td>
         <td>@e.Location.City, @e.Location.State</td>
         <td>
-            <NavLink href="@($"/employee/{e.Id}")"
+            <NavLink href="@($"/employees/{e.Id}")"
                      class="btn btn-sm btn-info">Details</NavLink>
+            <NavLink href="@($"/employees/edit/{e.Id}")"
+                     class="btn btn-sm btn-warning">Edit</NavLink>
+
         </td>
     </RowTemplate>
 </TableTemplate>
