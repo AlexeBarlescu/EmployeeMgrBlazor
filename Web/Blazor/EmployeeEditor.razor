@@ -1,4 +1,5 @@
-﻿@page "/employees/edit/{id:int}"
+﻿@page "/employees/create"
+@page "/employees/edit/{id:int}"
 @inherits OwningComponentBase<DataContext>
 @inject NavigationManager NavManager
 
@@ -63,9 +64,11 @@
 
     protected async override Task OnParametersSetAsync()
     {
-        Employee = await Context.Employees.Include(e => e.Department).Include(e => e.Location)
-            .FirstOrDefaultAsync(e => e.Id == Id);
-
+        if(Mode == "Edit")
+        {
+            Employee = await Context.Employees.Include(e => e.Department).Include(e => e.Location)
+                .FirstOrDefaultAsync(e => e.Id == Id);
+        }
         Departments = await Context.Departments.ToDictionaryAsync(d => d.Name, d => d.Id);
         Locations = await Context.Locations
             .ToDictionaryAsync(l => $"{l.City}, {l.State}", l => l.Id);
