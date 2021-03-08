@@ -3,10 +3,12 @@
 @inherits OwningComponentBase<DataContext>
 @inject NavigationManager NavManager
 
+<link rel="stylesheet" href="/css/blazorValidation.css"/>
+
 <PageTitle Title="@Mode"/>
 
 <EditForm Model="Employee" OnValidSubmit="HandleValidSubmit">
-
+    <DataAnnotationsValidator/>
     @if (Mode == "Edit")
     {
         <div class="form-group">
@@ -18,6 +20,7 @@
     <div class="form-group">
         <label>Name</label>
         <InputText @bind-Value="Employee.Name" class="form-control"/>
+        <ValidationMessage For="@(() => Employee.Name)"/>
     </div>
 
     <div class="form-group">
@@ -28,6 +31,7 @@
                       class="form-control">
             <option selected disabled>Select a Department</option>
         </CustomSelect>
+        <ValidationMessage For="@(() => Employee.DepartmentId)" />
     </div>
 
     <div class="form-group">
@@ -38,6 +42,7 @@
                       class="form-control">
             <option selected disabled>Select a Location</option>
         </CustomSelect>
+        <ValidationMessage For="@(() => Employee.LocationId)" />
     </div>
 
     <div class="form-group">
