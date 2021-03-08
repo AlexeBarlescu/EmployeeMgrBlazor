@@ -2,6 +2,7 @@
 @page "/employees"
 @inherits OwningComponentBase<DataContext>
 @inject NavigationManager NavManager
+@implements IDisposable
 
 <PageTitle Title="Employees"/>
 
@@ -13,12 +14,17 @@
         <th>Name</th>
         <th>Department</th>
         <th>Location</th>
+        <th></th>
     </Head>
     <RowTemplate Context="e">
         <td>@e.Id</td>
         <td>@e.Name</td>
         <td>@e.Department.Name</td>
         <td>@e.Location.City, @e.Location.State</td>
+        <td>
+            <NavLink href="@($"/employee/{e.Id}")"
+                     class="btn btn-sm btn-info">Details</NavLink>
+        </td>
     </RowTemplate>
 </TableTemplate>
 
@@ -62,4 +68,6 @@
             pageNumber = Convert.ToInt32(page);
         }
     }
+
+    public void Dispose() => NavManager.LocationChanged -= HandleLocationChanged;
 } 

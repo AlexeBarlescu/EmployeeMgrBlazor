@@ -1,0 +1,27 @@
+﻿@page "/employee/{id:int}"
+@inject DataContext Context
+
+<PageTitle Title="Details"/>
+
+<table class="table table-bordered table-striped">
+    <tr><td>Id</td><td>@Employee.Id</td></tr>
+    <tr><td>Name</td><td>@Employee.Name</td></tr>
+    <tr><td>Department</td><td>@Employee.Department.Name</td></tr>
+    <tr><td>Location</td><td>@Employee.Location.City, @Employee.Location.State</td></tr>
+</table>
+<div>
+    <NavLink href="/employees" class="btn btn-secondary">Back</NavLink>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public Employee Employee { get; set; } = new Employee();
+
+    protected async override Task OnInitializedAsync()
+    {
+        Employee = await Context.Employees.Include(e => e.Department).Include(e => e.Location)
+            .FirstOrDefaultAsync(e => e.Id == Id);
+    }
+}
