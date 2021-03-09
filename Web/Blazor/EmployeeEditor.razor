@@ -5,7 +5,7 @@
 
 <link rel="stylesheet" href="/css/blazorValidation.css"/>
 
-<PageTitle Title="@Mode"/>
+<PageTitle Title="@($"{Mode} Employee")"/>
 
 <EditForm Model="Employee" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator/>

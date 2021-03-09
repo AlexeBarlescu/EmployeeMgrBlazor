@@ -1,0 +1,34 @@
+﻿@page "/departments/{id:int}"
+@inject DataContext Context
+
+<PageTitle Title="Details" />
+
+<table class="table table-bordered table-striped">
+    <tr><td>Id</td><td>@Department.Id</td></tr>
+    <tr><td>Name</td><td>@Department.Name</td></tr>
+    <tr>
+        <td>Employees</td>
+        <td>
+            @foreach (Employee e in Department.Employees)
+            {
+                <NavLink class="btn-link mr-3" href="@($"/employees/{e.Id}")">@e.Name</NavLink>
+            }
+        </td>
+    </tr>
+</table>
+<div>
+    <NavLink href="/employees" class="btn btn-secondary">Back</NavLink>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public Department Department { get; set; } = new Department();
+
+    protected async override Task OnInitializedAsync()
+    {
+        Department = await Context.Departments.Include(d => d.Employees)
+            .FirstOrDefaultAsync(d => d.Id == Id);
+    }
+}

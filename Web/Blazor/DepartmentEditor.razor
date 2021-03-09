@@ -1,0 +1,60 @@
+﻿@page "/departments/create"
+@page "/departments/edit/{id:int}"
+@inherits OwningComponentBase<DataContext>
+@inject NavigationManager NavManager
+
+<link rel="stylesheet" href="/css/blazorValidation.css" />
+
+<PageTitle Title="@($"{Mode} Department")" />
+
+<EditForm Model="Department" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    @if (Mode == "Edit")
+    {
+        <div class="form-group">
+            <label>Id</label>
+            <InputNumber @bind-Value="Department.Id" readonly class="form-control" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label>Name</label>
+        <InputText @bind-Value="Department.Name" class="form-control" />
+        <ValidationMessage For="@(() => Department.Name)" />
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-@Theme" type="submit">@Mode</button>
+    </div>
+
+</EditForm>
+
+@code {
+    DataContext Context => Service;
+
+    [CascadingParameter(Name = "Theme")]
+    public string Theme { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    public Department Department { get; set; } = new Department();
+
+    public string Mode => Id == 0 ? "Create" : "Edit";
+
+    protected async override Task OnParametersSetAsync()
+    {
+        if (Mode == "Edit")
+        {
+            Department = await Context.Departments.Include(e => e.Employees)
+                .FirstOrDefaultAsync(e => e.Id == Id);
+        }
+    }
+
+    async Task HandleValidSubmit()
+    {
+        if (Mode == "Create") Context.Departments.Add(Department);
+        await Context.SaveChangesAsync();
+        NavManager.NavigateTo("/departments");
+    }
+}

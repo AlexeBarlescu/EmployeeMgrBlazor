@@ -1,3 +1,113 @@
 ﻿@page "/departments"
+@inherits OwningComponentBase<DataContext>
+@inject NavigationManager NavManager
+@implements IDisposable
 
-<PageTitle Title="Departments"/>
+<div class="d-flex justify-content-between align-items-center">
+    <PageTitle Title="Departments" />
+    <NavLink href="/departments/create" class="btn btn-primary">ADD</NavLink>
+</div>
+
+
+<TableTemplate RowType="Department" RowData="DepartmentData"
+               PageNumber="pageNumber" TotalPages="totalPages"
+               PageName="departments">
+    <Head>
+        <th @onclick="@HandleSortByName" style="cursor: pointer">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Name</span>
+                <i class="bi-arrow-down-up"></i>
+            </div>
+        </th>
+        <th @onclick="@HandleSortByEmployeeCount" style="cursor: pointer">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Employee Number</span>
+                <i class="bi-arrow-down-up"></i>
+            </div>
+        </th>
+
+        <th></th>
+    </Head>
+    <RowTemplate Context="d">
+        <td>@d.Name</td>
+        <td>@d.Employees.Count()</td>
+        <td class="text-right">
+            <NavLink href="@($"/departments/{d.Id}")"
+                     class="btn btn-sm btn-info">Details</NavLink>
+            <NavLink href="@($"/departments/edit/{d.Id}")"
+                     class="btn btn-sm btn-warning">Edit</NavLink>
+            <button class="btn btn-sm btn-danger" @onclick="@(() => HandleDelete(d))">Delete</button>
+        </td>
+    </RowTemplate>
+</TableTemplate>
+
+@code
+{
+    DataContext Context => Service;
+
+    int pageNumber = 1;
+    int pageSize = 7;
+    int totalPages = 0;
+
+    public IEnumerable<Department> DepartmentData { get; set; } = Enumerable.Empty<Department>();
+    public IQueryable<Department> Query { get; set; }
+    public bool SortAscending { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Query = Context.Departments.Include(d => d.Employees);
+
+        GetPageNumberFromQuery();
+
+        totalPages = (int)Math.Ceiling((double)Context.Departments.Count() / pageSize);
+
+        UpdateData();
+
+        NavManager.LocationChanged += HandleLocationChanged;
+    }
+
+    void UpdateData() =>
+        DepartmentData = Query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+    void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        GetPageNumberFromQuery();
+        UpdateData();
+        StateHasChanged();
+    }
+
+    void GetPageNumberFromQuery()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("page", out var page))
+        {
+            pageNumber = Convert.ToInt32(page);
+        }
+    }
+
+    void HandleSortByName()
+    {
+        Query = SortAscending ? Query.OrderBy(d => d.Name) : Query.OrderByDescending(d => d.Name);
+        SortAscending = !SortAscending;
+        UpdateData();
+        StateHasChanged();
+    }
+
+    void HandleSortByEmployeeCount()
+    {
+        Query = SortAscending ? Query.OrderBy(d => d.Employees.Count()) : Query.OrderByDescending(e => e.Employees.Count());
+        SortAscending = !SortAscending;
+        UpdateData();
+        StateHasChanged();
+    }
+
+    async Task HandleDelete(Department d)
+    {
+        Context.Departments.Remove(d);
+        await Context.SaveChangesAsync();
+        UpdateData();
+        StateHasChanged();
+    }
+
+    public void Dispose() => NavManager.LocationChanged -= HandleLocationChanged;
+} 
