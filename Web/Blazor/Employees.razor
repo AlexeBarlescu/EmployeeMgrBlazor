@@ -4,28 +4,46 @@
 @inject NavigationManager NavManager
 @implements IDisposable
 
-<PageTitle Title="Employees"/>
+<div class="d-flex justify-content-between align-items-center">
+    <PageTitle Title="Employees"/>
+    <NavLink href="/employees/create" class="btn btn-primary">ADD</NavLink>
+</div>
+    
 
 <TableTemplate RowType="Employee" RowData="EmployeeData" 
                PageNumber="pageNumber" TotalPages="totalPages"
                PageName="employees">
     <Head>
-        <th>Id</th>
-        <th>Name</th>
-        <th>Department</th>
-        <th>Location</th>
+        <th @onclick="@HandleSortByName" style="cursor: pointer">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Name</span>
+                <i class="bi-arrow-down-up"></i>
+            </div>
+        </th>
+        <th @onclick="@HandleSortByDepartment" style="cursor: pointer">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Department</span>
+                <i class="bi-arrow-down-up"></i>
+            </div>
+        </th>
+        <th @onclick="@HandleSortByLocation" style="cursor: pointer">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>Location</span>
+                <i class="bi-arrow-down-up"></i>
+            </div>
+        </th>
         <th></th>
     </Head>
     <RowTemplate Context="e">
-        <td>@e.Id</td>
         <td>@e.Name</td>
         <td>@e.Department.Name</td>
         <td>@e.Location.City, @e.Location.State</td>
-        <td>
+        <td class="text-right">
             <NavLink href="@($"/employees/{e.Id}")"
                      class="btn btn-sm btn-info">Details</NavLink>
             <NavLink href="@($"/employees/edit/{e.Id}")"
                      class="btn btn-sm btn-warning">Edit</NavLink>
+            <button class="btn btn-sm btn-danger" @onclick="@(() => HandleDelete(e))">Delete</button>
 
         </td>
     </RowTemplate>
@@ -40,12 +58,15 @@
     int totalPages = 0;
 
     public IEnumerable<Employee> EmployeeData { get; set; } = Enumerable.Empty<Employee>();
-    public IQueryable<Employee> Query => Context.Employees
-        .Include(e => e.Department).Include(e => e.Location);
+    public IQueryable<Employee> Query { get; set; }
+    public bool SortAscending { get; set; }
 
     protected override void OnInitialized()
     {
+        Query = Context.Employees.Include(e => e.Department).Include(e => e.Location);
+
         GetPageNumberFromQuery();
+
         totalPages = (int)Math.Ceiling((double)Context.Employees.Count() / pageSize);
 
         UpdateData();
@@ -70,6 +91,34 @@
         {
             pageNumber = Convert.ToInt32(page);
         }
+    }
+
+    void HandleSortByName()
+    {
+        Query = SortAscending ? Query.OrderBy(e => e.Name) : Query.OrderByDescending(e => e.Name);
+        SortAscending = !SortAscending;
+        UpdateData();
+        StateHasChanged();
+    }
+
+    void HandleSortByDepartment(){
+        Query = SortAscending ? Query.OrderBy(e => e.Department.Name) : Query.OrderByDescending(e => e.Department.Name);
+        SortAscending = !SortAscending;
+        UpdateData();
+        StateHasChanged();
+    }
+    void HandleSortByLocation(){
+        Query = SortAscending ? Query.OrderBy(e => e.Location.City) : Query.OrderByDescending(e => e.Location.City);
+        SortAscending = !SortAscending;
+        UpdateData();
+        StateHasChanged();
+    }
+
+    async Task HandleDelete(Employee e){
+        Context.Employees.Remove(e);
+        await Context.SaveChangesAsync();
+        UpdateData();
+        StateHasChanged();
     }
 
     public void Dispose() => NavManager.LocationChanged -= HandleLocationChanged;
